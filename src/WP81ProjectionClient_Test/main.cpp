@@ -10,7 +10,7 @@ void main()
 	IWICImagingFactory* pWICFactory = NULL;
 	CoCreateInstance(CLSID_WICImagingFactory1,NULL,CLSCTX_ALL,IID_PPV_ARGS(&pWICFactory));
 
-	PBYTE p = (PBYTE)malloc(PROJECTION_CLIENT_MAX_IMAGE_BUF_SIZE); //RAW图像数据
+	PBYTE p;
 	HANDLE hUsbBusDev = FindFirstUsbBusDev(); //查找USB设备（WP手机）
 	if (hUsbBusDev) //如果存在USB设备
 	{
@@ -27,7 +27,8 @@ void main()
 						break;
 					UINT nWidth = 0,nHeight = 0,nOrientation = WP_SCR_ORI_DEFAULT;
 					DWORD dwImageBits = 0;
-					if (!WaitWinPhoneScreenImageComplete(h,PROJECTION_CLIENT_MAX_IMAGE_BUF_SIZE,p,&nWidth,&nHeight,&dwImageBits,&nOrientation)) //等待数据读取完成
+					DWORD dwSrtride = 0;
+					if (!WaitWinPhoneScreenImageComplete(h,&p,&nWidth,&nHeight,&dwImageBits,&dwSrtride,&nOrientation)) //等待数据读取完成
 						break;
 					CHAR szBuffer[MAX_PATH] = {};
 					wsprintfA(szBuffer,"Image Accept:%d x %d,%d Bits,Orientation:%d",nWidth,nHeight,dwImageBits,nOrientation);
@@ -69,7 +70,6 @@ void main()
 		}
 	}
 	pWICFactory->Release();
-	free(p);
 	CoUninitialize();
 	ExitProcess(0);
 }
